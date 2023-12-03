@@ -1,40 +1,51 @@
 import React, { useContext } from "react";
 import { Context } from "../index";
-import { Container, Nav, Navbar, Button } from "react-bootstrap";
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
 import { NavLink } from "react-router-dom";
-import { STORE_ROUTE } from "../utils/consts";
+import { ADMIN_ROUTE, LOGIN_ROUTE, STORE_ROUTE } from "../utils/consts";
+import { Button } from "react-bootstrap";
 import { observer } from "mobx-react-lite";
-
+import Container from "react-bootstrap/Container";
+import { useHistory } from "react-router-dom";
 const NavBar = observer(() => {
 	const { user } = useContext(Context);
-	console.log(user);
+	const history = useHistory();
+
+	const logOut = () => {
+		user.setUser({});
+		user.setIsAuth(false);
+	};
+
 	return (
-		<Navbar bg="dark" data-bs-theme="dark">
+		<Navbar bg="dark" variant="dark">
 			<Container>
 				<NavLink style={{ color: "white" }} to={STORE_ROUTE}>
-					Megazone
+					КупиДевайс
 				</NavLink>
 				{user.isAuth ? (
-					<Nav className="ml-auto" style={{ color: "orange" }}>
-						<Button variant={"outline-light"} className="me-2 ms-2">
-							Admin
+					<Nav className="ml-auto" style={{ color: "white" }}>
+						<Button
+							variant={"outline-light"}
+							onClick={() => history.push(ADMIN_ROUTE)}
+						>
+							Админ панель
 						</Button>
 						<Button
 							variant={"outline-light"}
-							onClick={() => user.setIsAuth(false)}
-							className="ms-auto"
+							onClick={() => logOut()}
+							className="ml-2"
 						>
-							Logout
+							Выйти
 						</Button>
 					</Nav>
 				) : (
-					<Nav className="ml-auto" style={{ color: "orange" }}>
+					<Nav className="ml-auto" style={{ color: "white" }}>
 						<Button
 							variant={"outline-light"}
-							className="me-2 ms-2"
-							onClick={() => user.setIsAuth(true)}
+							onClick={() => history.push(LOGIN_ROUTE)}
 						>
-							Login
+							Авторизация
 						</Button>
 					</Nav>
 				)}

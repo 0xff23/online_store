@@ -1,47 +1,79 @@
-import React from "react";
-import { Container, Button, Row, Form, Col, Card } from "react-bootstrap";
-import { REGISTRATION_ROUTE, LOGIN_ROUTE } from "./../utils/consts";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Container, Form } from "react-bootstrap";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+import Row from "react-bootstrap/Row";
+import { NavLink, useLocation, useHistory } from "react-router-dom";
+import { LOGIN_ROUTE, REGISTRATION_ROUTE, STORE_ROUTE } from "../utils/consts";
+import { login, registration } from "../http/userAPI";
+import { observer } from "mobx-react-lite";
+import { Context } from "../index";
 
-const Auth = () => {
-	const localtion = useLocation();
-	const isLogin = localtion.pathname === LOGIN_ROUTE;
-	console.log(localtion);
+const Auth = observer(() => {
+	const { user } = useContext(Context);
+	const location = useLocation();
+	const history = useHistory();
+	const isLogin = location.pathname === LOGIN_ROUTE;
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+
+	const click = async () => {
+		try {
+			let data;
+			if (isLogin) {
+				data = await login(email, password);
+			} else {
+				data = await registration(email, password);
+			}
+			user.setUser(user);
+			user.setIsAuth(true);
+			history.push(STORE_ROUTE);
+		} catch (e) {
+			alert(e.response.data.message);
+		}
+	};
+
 	return (
 		<Container
 			className="d-flex justify-content-center align-items-center"
 			style={{ height: window.innerHeight - 54 }}
 		>
 			<Card style={{ width: 600 }} className="p-5">
-				<h2 className="m-auto">{isLogin ? "Login" : "Registration"}</h2>
+				<h2 className="m-auto">{isLogin ? "Авторизация" : "Регистрация"}</h2>
 				<Form className="d-flex flex-column">
-					<Form.Control className="mt-4" placeholder="Enter emails" />
 					<Form.Control
-						className="mt-4 align-self-end-0"
-						placeholder="Enter password"
+						className="mt-3"
+						placeholder="Введите ваш email..."
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
 					/>
-					<Row className="mt-4">
+					<Form.Control
+						className="mt-3"
+						placeholder="Введите ваш пароль..."
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						type="password"
+					/>
+					<Row className="d-flex justify-content-between mt-3 pl-3 pr-3">
 						{isLogin ? (
-							<Col className="d-flex align-items-center">
-								No account?&nbsp;
-								<NavLink to={LOGIN_ROUTE}> Login!</NavLink>
-							</Col>
+							<div>
+								Нет аккаунта?{" "}
+								<NavLink to={REGISTRATION_ROUTE}>Зарегистрируйся!</NavLink>
+							</div>
 						) : (
-							<Col className="d-flex align-items-center">
-								No account?&nbsp;
-								<NavLink to={REGISTRATION_ROUTE}> Sign up!</NavLink>
-							</Col>
+							<div>
+								Есть аккаунт? <NavLink to={LOGIN_ROUTE}>Войдите!</NavLink>
+							</div>
 						)}
-						<Col className="d-flex justify-content-end">
-							<Button variant="outline-success">
-								{isLogin ? "Login" : "Sign up"}
-							</Button>
-						</Col>
+						<Button variant={"outline-success"} onClick={click}>
+							{isLogin ? "Войти" : "Регистрация"}
+						</Button>
 					</Row>
 				</Form>
 			</Card>
 		</Container>
 	);
-};
+});
 
 export default Auth;
